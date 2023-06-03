@@ -1,0 +1,42 @@
+ 
+docker run --rm php:7.2-cli ls -al
+docker run --rm -p 8080:80 php:7.2-cli ls -al
+docker run --rm --workdir=/var php:7.2-cli ls
+docker run --rm -v ${PWD}/manager:/app php:7.2-cli ls
+docker run --rm -v ${PWD}/manager:/app --workdir=/var/www/html -p 8080:80 php:7.2-apache
+
+docker build --file=lessons/lesson_2/Dockerfile --tag lesson_2 lessons/lesson_2
+
+dev-build:
+	docker build --file=docker/development/php-cli.docker --tag dev-lesson_2 .
+
+dev-up:
+	docker run -d --name lesson_2-apache -v ./:/app -p 8080:80 dev-lesson_2
+
+dev-up-nginx:
+	docker network create app
+	docker run -d --name lesson_2-php-fpm -v ${PWD}:/app --network=app lesson_2-php-fpm
+	docker run -d --name lesson_2-php-nginx -v ${PWD}:/app -p 8080:80 --network=app lesson_2-php-nginx
+
+dev-down-nginx:
+	docker stop lesson_2-php-nginx
+	docker stop lesson_2-php-fpm
+	docker rm lesson_2-php-nginx
+	docker rm lesson_2-php-fpm
+	docker nework remove app
+
+dev-down:
+	docker stop lesson_2-apache
+	docker rm lesson_2-apache
+
+dev-cli:
+	docker run --rm -v .:/app dev-lesson_2 php bin/new.php
+
+prod-build:
+	docker build --pull --file=docker/production/php-cli.docker --tag prod-lesson_2 .
+
+prod-up:
+	docker run -d --name lesson_2-apache -p 8080:80 prod-lesson_2
+
+prod-cli:
+	docker run --rm prod-lesson_2 php bin/new.php
