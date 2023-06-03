@@ -14,13 +14,7 @@ dev-down:
 	docker-compose down --remove-orphans
 
 dev-cli:
-	docker run --rm -v .:/app dev-lesson_2 php bin/new.php
+	docker run --rm  -p 8080:80 -v .${PWD}/:/app dev-lesson_2 bash
 
-prod-build:
-	docker build --file=docker/production/php-cli.docker --tag prod-lesson_2 .
-
-prod-up:
-	docker run -d --name lesson_2-apache -p 8080:80 prod-lesson_2
-
-prod-cli:
-	docker run --rm prod-lesson_2 php bin/new.php
+dev-build:
+	docker build --file=docker/development/php-cli.docker --tag dev-lesson_2 .
